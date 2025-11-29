@@ -13,5 +13,10 @@
     "name": "Block Blast",
     "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Block%20Blast/Icon.png",
     "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Block%20Blast/Index.html"
+  },
+  {
+    "name": "Bendy",
+    "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bendy/Icon.png",
+    "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bendy/Index.html"
   }
 ]
