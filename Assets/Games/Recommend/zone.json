@@ -18,5 +18,10 @@
     "name": "Bendy",
     "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bendy/Icon.png",
     "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bendy/Index.html"
+  },
+  {
+    "name": "Bitlife",
+    "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bitlife/Icon.png",
+    "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bitlife/Index.html"
   }
 ]
