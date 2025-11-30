@@ -23,5 +23,10 @@
     "name": "Bitlife",
     "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bitlife/Icon.png",
     "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Bitlife/Index.html"
+  },
+  {
+    "name": "Among Us",
+    "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Among%20Us/Icon.png",
+    "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Among%20Us/Index.html"
   }
 ]
