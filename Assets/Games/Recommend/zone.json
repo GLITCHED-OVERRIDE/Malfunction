@@ -28,5 +28,10 @@
     "name": "Among Us",
     "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Among%20Us/Icon.png",
     "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Among%20Us/Index.html"
+  },
+  {
+    "name": "Cookie Clicker",
+    "cover": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Cookie%20Clicker/Icon.png",
+    "url": "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Assets/Games/Recommend/Files/Cookie%20Clicker/Index.html"
   }
 ]
