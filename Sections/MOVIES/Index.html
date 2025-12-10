@@ -1,1 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body { margin:0; display:flex; background:#111; color:#fff; font-family:sans-serif; overflow:hidden; }
+    #sidebar { width:140px; background:#0a0a0a; padding:12px 8px; display:flex; flex-direction:column; gap:10px; }
+    #sidebar input { width:100%; padding:8px; border-radius:6px; border:none; background:#1a1a1a; color:#fff; font-size:13px; outline:none; }
+    .menu-btn { width:100%; padding:10px; background:#111; border:none; border-radius:6px; text-align:left; color:#bbb; cursor:pointer; transition:0.2s; }
+    .menu-btn:hover, .menu-btn.active { background:#222; color:#fff; }
+    #main { margin-left:140px; width:calc(100% - 140px); height:100vh; overflow-y:auto; padding:20px; }
+    .section-title { font-size:1.3rem; margin:18px 0 10px; border-left:4px solid #fff; padding-left:8px; }
+    #trendingBox { width:100%; height:320px; background:#222 center/cover no-repeat; border-radius:10px; position:relative; cursor:pointer; transition: background-image 0.6s ease-in-out; }
+    #trendingTitle { position:absolute; bottom:20px; left:20px; font-size:1.8rem; font-weight:bold; text-shadow:0 0 8px #000; }
+    #previewBox { position:absolute; top:20px; right:20px; width:260px; background:rgba(0,0,0,0.85); padding:12px; border-radius:8px; display:none; color:#eee; }
+    .movie-row { display:flex; gap:12px; overflow-x:auto; padding-bottom:14px; }
+    .movie { flex:0 0 auto; width:160px; background:#0d0d0d; border-radius:8px; cursor:pointer; transition:transform .2s; }
+    .movie:hover { transform:scale(1.04); }
+    .movie img { width:100%; height:240px; object-fit:cover; border-radius:8px 8px 0 0; }
+    .movie .info { padding:8px; text-align:center; font-size:14px; color:#fff; }
+    #detailOverlay, #videoOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:9999; padding:20px; overflow-y:auto; }
+    .overlayContent { max-width:900px; margin:40px auto; background:#111; border-radius:10px; padding:20px; display:flex; gap:20px; }
+    .overlayContent img { width:300px; height:430px; object-fit:cover; border-radius:8px; }
+    .closeBtn { position:absolute; top:16px; right:24px; font-size:2rem; cursor:pointer; color:#fff; }
+    #player { width:100%; height:500px; border:none; border-radius:8px; background:#000; }
+    .season-btn, .episode-btn { background:#111; color:#fff; padding:6px 10px; margin:4px; border:1px solid #444; border-radius:6px; cursor:pointer; }
+    .season-btn.active { background:#fff; color:#000; }
+    @media(max-width:800px) {
+      #trendingBox { height:200px; }
+      .movie img { height:180px; }
+      .overlayContent { flex-direction:column; align-items:center; }
+      .overlayContent img { width:220px; height:320px; }
+      #player { height:320px; }
+    }
+  </style>
+</head>
+<body>
 
+  <div id="sidebar">
+    <input id="sidebarSearch" type="search" placeholder="Search movies & TV..." autocomplete="off">
+    <button class="menu-btn active" data-tab="home">Home</button>
+    <button class="menu-btn" data-tab="movies">Movies</button>
+    <button class="menu-btn" data-tab="tv">TV</button>
+  </div>
+
+  <div id="main">
+
+    <!-- HOME -->
+    <div id="home" class="page">
+      <div id="trendingBox"><div id="trendingTitle">Loading...</div></div>
+
+      <div id="recentWrapper" style="display:none;">
+        <h2 class="section-title">Recently Watched</h2>
+        <div class="movie-row" id="recentList"></div>
+      </div>
+
+      <h2 class="section-title">Popular TV Shows</h2>
+      <div class="movie-row" id="homePopularTV"></div>
+
+      <h2 class="section-title">Popular Movies</h2>
+      <div class="movie-row" id="homePopularMovies"></div>
+    </div>
+
+    <!-- MOVIES TAB -->
+    <div id="movies" class="page" style="display:none;">
+      <h2 class="section-title">Popular Movies</h2>
+      <div class="movie-row" id="popularMovies"></div>
+      <h2 class="section-title">Top Rated Movies</h2>
+      <div class="movie-row" id="topRatedMovies"></div>
+    </div>
+
+    <!-- TV TAB -->
+    <div id="tv" class="page" style="display:none;">
+      <h2 class="section-title">Popular TV Shows</h2>
+      <div class="movie-row" id="popularTV"></div>
+      <h2 class="section-title">Top Rated TV Shows</h2>
+      <div class="movie-row" id="topRatedTV"></div>
+    </div>
+
+    <!-- SEARCH RESULTS -->
+    <div id="searchResults" style="display:none;">
+      <h2 class="section-title">Search Results</h2>
+      <div class="movie-row" id="searchRow"></div>
+    </div>
+
+  </div>
+
+  <!-- DETAIL OVERLAY -->
+  <div id="detailOverlay">
+    <div class="closeBtn" id="closeDetail">&times;</div>
+    <div class="overlayContent">
+      <img id="detailPoster" src="">
+      <div class="details">
+        <h2 id="detailTitle"></h2>
+        <p><strong>Rating:</strong> <span id="detailRating"></span></p>
+        <p id="detailOverview"></p>
+        <div id="seasons"></div>
+        <div id="episodes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO OVERLAY -->
+  <div id="videoOverlay">
+    <div class="closeBtn" id="closeVideo">&times;</div>
+    <iframe id="player" allowfullscreen></iframe>
+  </div>
+
+<script>
+const API_KEY = "0e33c92186263620ce8c7f6b8fb35b00";
+const API_URL = "https://api.themoviedb.org/3";
+const IMG_BASE = "https://image.tmdb.org/t/p/w780";
+const POSTER_BASE = "https://image.tmdb.org/t/p/w500";
+const FALLBACK = "https://dummyimage.com/500x750/111/fff&text=No+Image";
+
+/* Utility to create a card */
+function createCard(item, type){
+  const div = document.createElement("div");
+  div.className = "movie";
+  const img = document.createElement("img");
+  img.src = item.poster_path ? POSTER_BASE + item.poster_path : FALLBACK;
+  const info = document.createElement("div");
+  info.className = "info";
+  info.innerHTML = `<h3>${item.title || item.name}</h3>`;
+  div.appendChild(img);
+  div.appendChild(info);
+  div.onclick = () => {
+    type === "tv" ? showTVDetail(item) : showMovieDetail(item);
+  };
+  return div;
+}
+
+/* Render row */
+async function renderRow(url, containerId, type){
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    data.results.forEach(i => container.appendChild(createCard(i, type)));
+  } catch(err) {
+    console.error("Error fetching", err);
+  }
+}
+
+/* Sidebar tab switching */
+document.querySelectorAll(".menu-btn").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    showTab(btn.dataset.tab);
+    document.getElementById("searchResults").style.display = "none";
+  };
+});
+
+function showTab(tab){
+  ["home","movies","tv"].forEach(t => {
+    const el = document.getElementById(t);
+    if(el) el.style.display = (t === tab) ? "block" : "none";
+  });
+}
+
+/* Recently Watched */
+function saveRecent(item, type){
+  let arr = JSON.parse(localStorage.getItem("recent") || "[]");
+  arr = arr.filter(x => x.id !== item.id);
+  arr.unshift({...item, type});
+  if(arr.length > 12) arr.pop();
+  localStorage.setItem("recent", JSON.stringify(arr));
+  renderRecent();
+}
+function renderRecent(){
+  const arr = JSON.parse(localStorage.getItem("recent") || "[]");
+  const wrapper = document.getElementById("recentWrapper");
+  const list = document.getElementById("recentList");
+  if(!arr || arr.length === 0){
+    wrapper.style.display = "none";
+    return;
+  }
+  wrapper.style.display = "block";
+  list.innerHTML = "";
+  arr.forEach(i => list.appendChild(createCard(i, i.type || "movie")));
+}
+
+/* Detail & Video overlay */
+const detailOverlay = document.getElementById("detailOverlay");
+const videoOverlay = document.getElementById("videoOverlay");
+const closeDetail = document.getElementById("closeDetail");
+const closeVideo = document.getElementById("closeVideo");
+
+closeDetail.onclick = () => { detailOverlay.style.display = "none"; };
+closeVideo.onclick = () => { videoOverlay.style.display = "none"; document.getElementById("player").src = ""; };
+
+function showMovieDetail(item){
+  detailOverlay.style.display = "block";
+  document.getElementById("detailPoster").src = item.poster_path ? POSTER_BASE + item.poster_path : FALLBACK;
+  document.getElementById("detailTitle").innerText = item.title;
+  document.getElementById("detailRating").innerText = (item.vote_average || 0).toFixed(1);
+  document.getElementById("detailOverview").innerText = item.overview || "No description";
+  document.getElementById("seasons").innerHTML = "";
+  document.getElementById("episodes").innerHTML = "";
+
+  // open video player
+  document.getElementById("player").src = `https://player.videasy.net/movie/${item.id}`;
+  videoOverlay.style.display = "block";
+
+  saveRecent(item, "movie");
+}
+
+async function showTVDetail(item){
+  detailOverlay.style.display = "block";
+  document.getElementById("detailPoster").src = item.poster_path ? POSTER_BASE + item.poster_path : FALLBACK;
+  document.getElementById("detailTitle").innerText = item.name;
+  document.getElementById("detailRating").innerText = (item.vote_average || 0).toFixed(1);
+  document.getElementById("detailOverview").innerText = item.overview || "No description";
+  const seasonsContainer = document.getElementById("seasons");
+  seasonsContainer.innerHTML = "";
+  const tv = await fetch(`${API_URL}/tv/${item.id}?api_key=${API_KEY}`).then(r => r.json());
+  tv.seasons.forEach(s => {
+    const btn = document.createElement("button");
+    btn.className = "season-btn";
+    btn.innerText = "Season " + s.season_number;
+    btn.onclick = () => loadEpisodes(item.id, s.season_number, btn);
+    seasonsContainer.appendChild(btn);
+  });
+
+  saveRecent(item, "tv");
+}
+
+async function loadEpisodes(tvId, seasonNum, btn){
+  document.querySelectorAll(".season-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  const eps = await fetch(`${API_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}`).then(r => r.json());
+  const epDiv = document.getElementById("episodes");
+  epDiv.innerHTML = "";
+  eps.episodes.forEach(ep => {
+    const b = document.createElement("button");
+    b.className = "episode-btn";
+    b.innerText = `Ep ${ep.episode_number}: ${ep.name}`;
+    b.onclick = () => {
+      document.getElementById("player").src = `https://player.videasy.net/tv/${tvId}/${seasonNum}/${ep.episode_number}`;
+      videoOverlay.style.display = "block";
+    };
+    epDiv.appendChild(b);
+  });
+}
+
+/* SEARCH functionality */
+const searchInput = document.getElementById("sidebarSearch");
+searchInput.addEventListener("input", async () => {
+  const q = searchInput.value.trim();
+  if(!q){
+    document.getElementById("searchResults").style.display = "none";
+    const active = document.querySelector(".menu-btn.active").dataset.tab;
+    showTab(active);
+    return;
+  }
+  // show search results
+  showTab(""); // hide all tabs
+  const sr = document.getElementById("searchResults");
+  sr.style.display = "block";
+  const searchRow = document.getElementById("searchRow");
+  searchRow.innerHTML = "";
+
+  // search movies
+  const m = await fetch(`${API_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(q)}`).then(r => r.json());
+  m.results.forEach(i => searchRow.appendChild(createCard(i, "movie")));
+
+  // search tv
+  const tv = await fetch(`${API_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(q)}`).then(r => r.json());
+  tv.results.forEach(i => searchRow.appendChild(createCard(i, "tv")));
+});
+
+/* TRENDING slider logic */
+let trendingList = [];
+let trendingIndex = 0;
+let hoverTimer = null;
+
+async function loadTrending(){
+  const data = await fetch(`${API_URL}/trending/all/week?api_key=${API_KEY}`).then(r => r.json());
+  trendingList = data.results.filter(i => i.backdrop_path || i.poster_path);
+  if(trendingList.length === 0) return;
+  showTrendingSlide();
+  setInterval(() => {
+    trendingIndex = (trendingIndex + 1) % trendingList.length;
+    showTrendingSlide();
+  }, 6000);
+}
+
+function showTrendingSlide(){
+  const item = trendingList[trendingIndex];
+  const bg = item.backdrop_path ? IMG_BASE + item.backdrop_path : (item.poster_path ? POSTER_BASE + item.poster_path : FALLBACK);
+  document.getElementById("trendingBox").style.backgroundImage = `url('${bg}')`;
+  document.getElementById("trendingTitle").innerText = item.title || item.name;  
+
+  // click to open
+  document.getElementById("trendingBox").onclick = () => {
+    if(item.media_type === "tv") showTVDetail(item);
+    else showMovieDetail(item);
+  };
+
+  // hover for preview
+  document.getElementById("trendingBox").onmouseenter = () => {
+    hoverTimer = setTimeout(() => {
+      const pbox = document.getElementById("previewBox");
+      pbox.innerHTML = `<strong>${item.title || item.name}</strong><br><br>${(item.overview || "").slice(0,200) + "..."}`;
+      pbox.style.display = "block";
+    }, 1200);
+  };
+  document.getElementById("trendingBox").onmouseleave = () => {
+    clearTimeout(hoverTimer);
+    document.getElementById("previewBox").style.display = "none";
+  };
+}
+
+/* INITIAL LOAD */
+(async function(){
+  await loadTrending();
+  await renderRow(`${API_URL}/tv/popular?api_key=${API_KEY}`, "homePopularTV", "tv");
+  await renderRow(`${API_URL}/movie/popular?api_key=${API_KEY}`, "homePopularMovies", "movie");
+  await renderRow(`${API_URL}/movie/popular?api_key=${API_KEY}`, "popularMovies", "movie");
+  await renderRow(`${API_URL}/movie/top_rated?api_key=${API_KEY}`, "topRatedMovies", "movie");
+  await renderRow(`${API_URL}/tv/popular?api_key=${API_KEY}`, "popularTV", "tv");
+  await renderRow(`${API_URL}/tv/top_rated?api_key=${API_KEY}`, "topRatedTV", "tv");
+  renderRecent();
+})();
+</script>
+
+</body>
+  </html>
