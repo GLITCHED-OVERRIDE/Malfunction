@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>No Games Found</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0b0b0b;
+            color: #d0d0d0;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Fading grid background */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(#ff0000 1px, transparent 1px),
+                linear-gradient(90deg, #ff0000 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
+            -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
+            opacity: 0.75;
+        }
+
+        .container {
+            position: relative;
+            text-align: center;
+            z-index: 1;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 48px;
+            letter-spacing: 3px;
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 22px;
+            letter-spacing: 1.5px;
+            color: #ff9797;
+            line-height: 1.6;
+        }
+
+        .soon {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #fff9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Whoops</h1>
+        <p>Seems Theres no Games Here Yet</p>
+        <div class="soon">Must be coming soon</div>
+    </div>
+</body>
+</html>
