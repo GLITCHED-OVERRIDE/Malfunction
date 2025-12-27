@@ -80,6 +80,7 @@ let allGames = [];
 let recentGames = JSON.parse(localStorage.getItem('recentGames')||'[]');
 let favoriteGames = JSON.parse(localStorage.getItem('favoriteGames')||'[]');
 
+// Fetch JSON
 async function fetchGames() {
   try {
     const res = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json');
@@ -89,11 +90,13 @@ async function fetchGames() {
   }
 }
 
+// Save storage
 function saveStorage(){
   localStorage.setItem('recentGames', JSON.stringify(recentGames));
   localStorage.setItem('favoriteGames', JSON.stringify(favoriteGames));
 }
 
+// Home view
 function renderHome(){
   zoneTitle.textContent='Home';
   contentArea.innerHTML='';
@@ -114,6 +117,7 @@ function renderHome(){
   contentArea.appendChild(favDiv);
 }
 
+// Game card
 function createGameCard(g){
   const card = document.createElement('div'); card.className='card';
   card.innerHTML=`<img src="${g.cover}"><h3>${g.name}</h3>`;
@@ -121,6 +125,7 @@ function createGameCard(g){
   return card;
 }
 
+// Zone view
 function renderZone(zone){
   zoneTitle.textContent=zone;
   contentArea.innerHTML='';
@@ -137,14 +142,30 @@ function renderZone(zone){
   contentArea.appendChild(grid);
 }
 
+// Open game overlay
 function openGameOverlay(g){
   overlayTitle.textContent = g.name;
-  // Update URL
   history.pushState({game:g.name}, '', `/games/${encodeURIComponent(g.name)}`);
-  // Load iframe from own site path
-  gameIframe.src = `/file/games/${encodeURIComponent(g.name)}`;
-  favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
 
+  // Full file prodical fetch
+  const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/PC/${encodeURIComponent(g.name)}/index.html`;
+  fetch(gameURL)
+    .then(r => {
+      if(!r.ok) throw new Error('Game not found');
+      return r.text();
+    })
+    .then(html => {
+      const blob = new Blob([html], {type:'text/html'});
+      const blobURL = URL.createObjectURL(blob);
+      gameIframe.src = blobURL;
+    })
+    .catch(()=> {
+      fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
+        .then(r=>r.text())
+        .then(html=>gameIframe.src = URL.createObjectURL(new Blob([html], {type:'text/html'})))
+    });
+
+  favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
   recentGames=[g,...recentGames.filter(x=>x.url!==g.url)].slice(0,10);
   saveStorage();
 
@@ -176,7 +197,10 @@ fullscreenBtn.onclick=()=>{
 }
 
 // Close overlay
-closeOverlayBtn.onclick=()=>{gameOverlay.style.display='none'; history.pushState({}, '', '/');}
+closeOverlayBtn.onclick=()=>{
+  gameOverlay.style.display='none'; 
+  history.pushState({}, '', '/');
+}
 
 // Sidebar navigation
 buttons.forEach(btn=>{
