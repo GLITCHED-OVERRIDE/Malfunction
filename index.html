@@ -5,49 +5,82 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Hyper Game Hub</title>
 <style>
-  :root{--bg:#000;--panel:#111;--accent:#ff3030;--card:#222;--text:#ddd;}
-  body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);display:flex;overflow:hidden;}
-  .sidebar{width:220px;background:var(--panel);padding:12px;display:flex;flex-direction:column;gap:8px;border-right:1px solid #222;}
-  .sidebar button{background:var(--card);border:none;color:var(--text);padding:10px;border-radius:6px;cursor:pointer;}
-  .sidebar button.active{background:#333;color:var(--accent);font-weight:700;}
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .topbar{height:50px;background:var(--panel);border-bottom:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:8px;}
-  .content{flex:1;overflow:auto;padding:12px;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;}
-  .card{background:var(--card);border-radius:10px;overflow:hidden;cursor:pointer;transition:.15s;}
-  .card:hover{transform:translateY(-4px);box-shadow:0 6px 16px rgba(255,48,48,.1);}
-  .card img{width:100%;aspect-ratio:1/1;object-fit:cover;}
-  .card h3{text-align:center;padding:6px;font-size:.85rem;}
+:root{--bg:#000;--panel:#111;--accent:#ff3030;--card:#222;--text:#ddd;}
+body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);display:flex;overflow:hidden;}
+.sidebar{width:220px;background:var(--panel);padding:12px;display:flex;flex-direction:column;gap:8px;border-right:1px solid #222;}
+.sidebar button{background:var(--card);border:none;color:var(--text);padding:10px;border-radius:6px;cursor:pointer;}
+.sidebar button.active{background:#333;color:var(--accent);font-weight:700;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:50px;background:var(--panel);border-bottom:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:8px;}
+.content{flex:1;overflow:auto;padding:12px;}
+.section-title{color:var(--accent);margin:12px 0 6px;font-size:1.1rem;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;}
+.card{background:var(--card);border-radius:10px;overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column;}
+.card:hover{transform:translateY(-4px);box-shadow:0 6px 16px rgba(255,48,48,.1);}
+.card img{width:100%;aspect-ratio:1/1;object-fit:cover;}
+.card h3{text-align:center;padding:6px;font-size:.85rem;}
+.game-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:none;flex-direction:column;}
+.overlay-header{height:50px;background:var(--panel);display:flex;align-items:center;padding:0 12px;justify-content:space-between;border-bottom:1px solid #222;}
+.overlay-content{flex:1;overflow:auto;padding:12px;}
+.overlay-content iframe{width:100%;height:500px;border:none;}
+.overlay-footer{margin-top:12px;}
+.star-btn{background:none;border:none;color:#888;font-size:22px;cursor:pointer;}
+.star-btn.active{color:var(--accent);}
+.fullscreen-btn{background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 <body>
-  <div class="sidebar" id="sidebar">
-    <button class="active" data-zone="Home">Home</button>
-    <button data-zone="PC">PC</button>
-    <button data-zone="Moblie">Moblie</button>
-    <button data-zone="N64">N64</button>
-    <button data-zone="NDS">NDS</button>
-    <button data-zone="PS1">PS1</button>
-    <button data-zone="Game Boy">Game Boy</button>
-    <button data-zone="Game Boy Advanced">Game Boy Advanced</button>
-    <button data-zone="Game Boy Color">Game Boy Color</button>
-    <button data-zone="NES">NES</button>
-    <button data-zone="SNES">SNES</button>
-    <button data-zone="Sega Genisis">Sega Genisis</button>
+<div class="sidebar" id="sidebar">
+  <button class="active" data-zone="Home">Home</button>
+  <button data-zone="PC">PC</button>
+  <button data-zone="Moblie">Moblie</button>
+  <button data-zone="N64">N64</button>
+  <button data-zone="NDS">NDS</button>
+  <button data-zone="PS1">PS1</button>
+  <button data-zone="Game Boy">Game Boy</button>
+  <button data-zone="Game Boy Advanced">Game Boy Advanced</button>
+  <button data-zone="Game Boy Color">Game Boy Color</button>
+  <button data-zone="NES">NES</button>
+  <button data-zone="SNES">SNES</button>
+  <button data-zone="Sega Genisis">Sega Genisis</button>
+</div>
+<div class="main">
+  <div class="topbar"><h2 id="zoneTitle">Home</h2></div>
+  <div class="content" id="contentArea">Loading...</div>
+</div>
+
+<!-- Game Overlay -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="overlay-header">
+    <div id="overlayTitle"></div>
+    <div>
+      <button class="star-btn" id="favoriteBtn">&#9733;</button>
+      <button class="fullscreen-btn" id="fullscreenBtn">Full Screen</button>
+      <button class="star-btn" id="closeOverlayBtn" style="font-size:28px;">&times;</button>
+    </div>
   </div>
-  <div class="main">
-    <div class="topbar"><h2 id="zoneTitle">Home</h2></div>
-    <div class="content" id="contentArea">Loading...</div>
+  <div class="overlay-content" id="overlayContent">
+    <iframe id="gameIframe" src="about:blank"></iframe>
+    <div id="moreGamesContainer"></div>
   </div>
+</div>
 
 <script>
 const contentArea = document.getElementById('contentArea');
 const zoneTitle = document.getElementById('zoneTitle');
 const buttons = document.querySelectorAll('.sidebar button');
+const gameOverlay = document.getElementById('gameOverlay');
+const overlayTitle = document.getElementById('overlayTitle');
+const favoriteBtn = document.getElementById('favoriteBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+const gameIframe = document.getElementById('gameIframe');
+const moreGamesContainer = document.getElementById('moreGamesContainer');
 
 let allGames = [];
+let recentGames = JSON.parse(localStorage.getItem('recentGames')||'[]');
+let favoriteGames = JSON.parse(localStorage.getItem('favoriteGames')||'[]');
 
-// Fetch JSON of all games
 async function fetchGames() {
   try {
     const res = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json');
@@ -57,61 +90,130 @@ async function fetchGames() {
   }
 }
 
-// Render a zone or home
-async function renderZone(zone){
-  zoneTitle.textContent = zone;
-  contentArea.innerHTML = '';
-  if(zone === 'Home'){
-    contentArea.innerHTML = '<p>Welcome! Select a zone to view games.</p>';
-    return;
-  }
-  const games = allGames.filter(g => g.type === zone);
-  if(games.length === 0){
-    // Fetch 404 page
-    const html = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
-                        .then(r=>r.text())
-                        .catch(()=>'<h1>404 Not Found</h1>');
-    contentArea.innerHTML = html;
-    return;
-  }
+function saveStorage(){
+  localStorage.setItem('recentGames', JSON.stringify(recentGames));
+  localStorage.setItem('favoriteGames', JSON.stringify(favoriteGames));
+}
 
-  const grid = document.createElement('div');
-  grid.className = 'grid';
-  games.forEach(g => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<img src="${g.cover}" alt="${g.name}"><h3>${g.name}</h3>`;
-    card.onclick = async () => {
-      try {
-        const gameHTML = await fetch(g.url).then(r=>r.text());
-        document.open();
-        document.write(gameHTML);
-        document.close();
-      } catch(e){
-        const fallback = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
-                                .then(r=>r.text())
-                                .catch(()=>'<h1>404 Not Found</h1>');
-        document.open();
-        document.write(fallback);
-        document.close();
-      }
-    }
-    grid.appendChild(card);
-  });
+function renderHome(){
+  zoneTitle.textContent='Home';
+  contentArea.innerHTML='';
+  // Recently played
+  const recentDiv = document.createElement('div');
+  recentDiv.innerHTML='<div class="section-title">Recently Played</div>';
+  const recentGrid = document.createElement('div'); recentGrid.className='grid';
+  if(recentGames.length===0){
+    recentGrid.innerHTML='<p style="color:#aaa;">No recently played games</p>';
+  } else {
+    recentGames.forEach(g=>recentGrid.appendChild(createGameCard(g)));
+  }
+  recentDiv.appendChild(recentGrid);
+  contentArea.appendChild(recentDiv);
+
+  // Favorites
+  const favDiv = document.createElement('div');
+  favDiv.innerHTML='<div class="section-title">Favorites</div>';
+  const favGrid = document.createElement('div'); favGrid.className='grid';
+  if(favoriteGames.length===0){
+    favGrid.innerHTML='<p style="color:#aaa;">No favorites yet</p>';
+  } else {
+    favoriteGames.forEach(g=>favGrid.appendChild(createGameCard(g)));
+  }
+  favDiv.appendChild(favGrid);
+  contentArea.appendChild(favDiv);
+}
+
+function createGameCard(g){
+  const card = document.createElement('div'); card.className='card';
+  card.innerHTML=`<img src="${g.cover}"><h3>${g.name}</h3>`;
+  card.onclick=()=>openGameOverlay(g);
+  return card;
+}
+
+function renderZone(zone){
+  zoneTitle.textContent=zone;
+  contentArea.innerHTML='';
+  const games = allGames.filter(g=>g.type===zone);
+  if(games.length===0){
+    fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
+      .then(r=>r.text())
+      .then(html=>contentArea.innerHTML=html)
+      .catch(()=>contentArea.innerHTML='<h1>404 Not Found</h1>');
+    return;
+  }
+  const grid = document.createElement('div'); grid.className='grid';
+  games.forEach(g=>grid.appendChild(createGameCard(g)));
   contentArea.appendChild(grid);
 }
 
-// Sidebar buttons
-buttons.forEach(btn => {
-  btn.onclick = () => {
+function openGameOverlay(g){
+  overlayTitle.textContent = g.name;
+  gameIframe.src = 'about:blank';
+  favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
+  // Update recents
+  recentGames=[g,...recentGames.filter(x=>x.url!==g.url)].slice(0,10);
+  saveStorage();
+
+  // Load game HTML
+  fetch(g.url)
+    .then(r=>r.text())
+    .then(html=>{
+      gameIframe.contentWindow.document.open();
+      gameIframe.contentWindow.document.write(html);
+      gameIframe.contentWindow.document.close();
+    })
+    .catch(async ()=>{
+      const fallback = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html').then(r=>r.text());
+      gameIframe.contentWindow.document.open();
+      gameIframe.contentWindow.document.write(fallback);
+      gameIframe.contentWindow.document.close();
+    });
+
+  // More games (random 10 from same zone)
+  const sameZone = allGames.filter(x=>x.type===g.type && x.url!==g.url);
+  const shuffled = sameZone.sort(()=>0.5-Math.random()).slice(0,10);
+  moreGamesContainer.innerHTML='<div class="section-title">More Games</div>';
+  const moreGrid = document.createElement('div'); moreGrid.className='grid';
+  shuffled.forEach(x=>moreGrid.appendChild(createGameCard(x)));
+  moreGamesContainer.appendChild(moreGrid);
+
+  gameOverlay.style.display='flex';
+}
+
+favoriteBtn.onclick=()=>{
+  const url = overlayTitle.textContent;
+  const currentGame = allGames.find(g=>g.name===url);
+  if(!currentGame) return;
+  const idx = favoriteGames.findIndex(x=>x.url===currentGame.url);
+  if(idx>=0){
+    favoriteGames.splice(idx,1);
+    favoriteBtn.classList.remove('active');
+  } else {
+    favoriteGames.push(currentGame);
+    favoriteBtn.classList.add('active');
+  }
+  saveStorage();
+}
+
+fullscreenBtn.onclick=()=>{
+  if(gameIframe.requestFullscreen) gameIframe.requestFullscreen();
+  else if(gameIframe.webkitRequestFullscreen) gameIframe.webkitRequestFullscreen();
+}
+
+closeOverlayBtn.onclick=()=>{gameOverlay.style.display='none';}
+
+buttons.forEach(btn=>{
+  btn.onclick=()=>{
     buttons.forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    renderZone(btn.dataset.zone);
+    const zone = btn.dataset.zone;
+    if(zone==='Home') renderHome();
+    else renderZone(zone);
   }
 });
 
 // Initialize
-fetchGames().then(()=>renderZone('Home'));
+fetchGames().then(()=>renderHome());
 </script>
 </body>
-</html>
+  </html>
