@@ -142,9 +142,14 @@ function renderZone(zone){
 
 function openGameOverlay(g){
   overlayTitle.textContent = g.name;
-  history.pushState({game:g.name}, '', `/games/${encodeURIComponent(g.name)}`);
 
-  const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/PC/${encodeURIComponent(g.name)}/index.html`;
+  // Update URL to include type
+  history.pushState({game:g.name}, '', `/games/${encodeURIComponent(g.type)}/${encodeURIComponent(g.name)}`);
+
+  // Construct game URL dynamically based on type
+  const typeFolder = g.type.replace(/\s+/g,'-');
+  const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/${typeFolder}/${encodeURIComponent(g.name)}/index.html`;
+
   fetch(gameURL)
     .then(r => r.ok ? r.text() : Promise.reject())
     .then(html => {
