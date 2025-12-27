@@ -143,24 +143,35 @@ function renderZone(zone){
 function openGameOverlay(g){
   overlayTitle.textContent = g.name;
 
-  // Update URL to include type
+  // Update URL
   history.pushState({game:g.name}, '', `/games/${encodeURIComponent(g.type)}/${encodeURIComponent(g.name)}`);
 
-  // Construct game URL dynamically based on type
-  const typeFolder = g.type.replace(/\s+/g,'-');
-  const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/${typeFolder}/${encodeURIComponent(g.name)}/index.html`;
-
-  fetch(gameURL)
-    .then(r => r.ok ? r.text() : Promise.reject())
-    .then(html => {
-      const blob = new Blob([html], {type:'text/html'});
-      gameIframe.src = URL.createObjectURL(blob);
-    })
-    .catch(()=> {
-      fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
-        .then(r=>r.text())
-        .then(html => gameIframe.src = URL.createObjectURL(new Blob([html], {type:'text/html'})))
-    });
+  // --- GitHub raw strategy ---
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  if(parts.length===1 && parts[0]==='Games'){
+    // show JSON
+    fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json')
+      .then(r=>r.json())
+      .then(json=>{
+        const pre = document.createElement('pre');
+        pre.textContent = JSON.stringify(json,null,2);
+        gameIframe.srcdoc = `<body style="background:#fff;color:#24292f;font-family:monospace;padding:20px"><pre>${pre.textContent}</pre></body>`;
+      });
+  } else {
+    // full file prodical
+    const typeFolder = g.type.replace(/\s+/g,'-');
+    const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/${typeFolder}/${encodeURIComponent(g.name)}/index.html`;
+    fetch(gameURL)
+      .then(r=>r.ok?r.text():Promise.reject())
+      .then(html=>{
+        gameIframe.srcdoc=html;
+      })
+      .catch(()=>{
+        fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
+          .then(r=>r.text())
+          .then(html=>gameIframe.srcdoc=html);
+      });
+  }
 
   favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
   recentGames=[g,...recentGames.filter(x=>x.url!==g.url)].slice(0,10);
