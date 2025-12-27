@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malfunction</title>
+<link rel="icon" href="https://raw.githubusercontent.com/GLITCHED-OVERRIDE/System-Crash/refs/heads/main/favicon.ico">
 <style>
 :root{
   --bg:#000;
@@ -12,21 +13,29 @@
   --card:#222;
   --text:#ddd;
 }
-body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto;}
+body{display:flex;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);}
 .sidebar{width:220px;background:var(--panel);padding:12px;display:flex;flex-direction:column;gap:6px;border-right:1px solid #222;}
-.sidebar button{background:var(--card);border:none;color:var(--text);padding:10px;border-radius:6px;cursor:pointer;text-align:left;}
+.sidebar button{background:var(--card);border:none;color:var(--text);padding:10px;border-radius:6px;cursor:pointer;text-align:left;transition:.15s;}
+.sidebar button:hover{background:#222;}
 .sidebar button.active{background:#333;color:var(--accent);font-weight:700;}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.topbar{height:50px;background:var(--panel);display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #222;}
+.topbar{height:50px;background:var(--panel);display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #222;justify-content:space-between;}
 .zone-title{font-weight:600;color:var(--accent);}
 .content{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px;}
-.game-frame{width:100%;height:600px;border:none;background:#000;}
 .section-title{color:var(--accent);margin:12px 0 6px;font-size:1.1rem;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;}
 .card{background:var(--card);border-radius:10px;overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column;}
 .card:hover{transform:translateY(-4px);box-shadow:0 6px 16px rgba(255,48,48,.1);}
 .card img{width:100%;aspect-ratio:1/1;object-fit:cover;}
 .card h3{text-align:center;padding:6px;font-size:.85rem;}
+.game-frame{width:100%;height:600px;border:none;background:#000;border-radius:8px;}
+.game-controls{display:flex;justify-content:flex-end;gap:12px;margin-bottom:6px;}
+.btn{background:var(--accent);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;transition:.15s;}
+.btn:hover{opacity:.85;}
+.star{font-size:1.3rem;color:#555;cursor:pointer;transition:.15s;}
+.star.active{color:gold;}
+p.muted{color:#aaa;font-size:.9rem;text-align:center;}
 </style>
 </head>
 <body>
@@ -47,16 +56,21 @@ body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);disp
 </div>
 
 <div class="main">
-  <div class="topbar"><h2 class="zone-title" id="zoneTitle">Home</h2></div>
+  <div class="topbar">
+    <h2 class="zone-title" id="zoneTitle">Home</h2>
+    <div class="game-controls" id="gameControls"></div>
+  </div>
   <div class="content" id="contentArea">Loading...</div>
 </div>
 
 <script>
 const JSON_URL = "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json";
 const ERROR_404 = "https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html";
+const SITE_URL = "https://malfunction-sand.vercel.app";
 
 const contentArea = document.getElementById('contentArea');
 const zoneTitle = document.getElementById('zoneTitle');
+const gameControls = document.getElementById('gameControls');
 const buttons = document.querySelectorAll('.sidebar button');
 
 let allGames = [];
@@ -70,7 +84,7 @@ function saveStorage(){
 
 async function fetchGames(){
   try { allGames = await (await fetch(JSON_URL)).json(); }
-  catch(e){ contentArea.innerHTML = '<p style="color:#aaa;">Failed to load games</p>'; }
+  catch(e){ contentArea.innerHTML = '<p class="muted">Failed to load games</p>'; }
 }
 
 function createGameCard(g){
@@ -82,12 +96,13 @@ function createGameCard(g){
 
 function renderHome(){
   zoneTitle.textContent='Home';
+  gameControls.innerHTML='';
   contentArea.innerHTML='';
 
   const recentDiv = document.createElement('div');
   recentDiv.innerHTML='<div class="section-title">Recently Played</div>';
   const recentGrid = document.createElement('div'); recentGrid.className='grid';
-  if(recentGames.length===0) recentGrid.innerHTML='<p style="color:#aaa;">No recently played games</p>';
+  if(recentGames.length===0) recentGrid.innerHTML='<p class="muted">No recently played games</p>';
   else recentGames.forEach(g=>recentGrid.appendChild(createGameCard(g)));
   recentDiv.appendChild(recentGrid);
   contentArea.appendChild(recentDiv);
@@ -95,7 +110,7 @@ function renderHome(){
   const favDiv = document.createElement('div');
   favDiv.innerHTML='<div class="section-title">Favorites</div>';
   const favGrid = document.createElement('div'); favGrid.className='grid';
-  if(favoriteGames.length===0) favGrid.innerHTML='<p style="color:#aaa;">No favorites yet</p>';
+  if(favoriteGames.length===0) favGrid.innerHTML='<p class="muted">No favorites yet</p>';
   else favoriteGames.forEach(g=>favGrid.appendChild(createGameCard(g)));
   favDiv.appendChild(favGrid);
   contentArea.appendChild(favDiv);
@@ -103,6 +118,7 @@ function renderHome(){
 
 function renderZone(zone){
   zoneTitle.textContent=zone;
+  gameControls.innerHTML='';
   contentArea.innerHTML='';
   const games = allGames.filter(g=>g.type.toLowerCase()===zone.toLowerCase());
   if(games.length===0){
@@ -119,13 +135,34 @@ function renderGamePage(g){
   const typeNorm = encodeURIComponent(g.type);
   const nameNorm = encodeURIComponent(g.name);
   history.replaceState({game:g.name}, '', `/games/${typeNorm}/${nameNorm}`);
+  contentArea.innerHTML='';
+  gameControls.innerHTML='';
 
-  contentArea.innerHTML = '';
+  // Favorite star
+  const star = document.createElement('span');
+  star.className='star'+(favoriteGames.some(f=>f.url===g.url)?' active':'');
+  star.innerHTML='&#9733;';
+  star.onclick=()=>{
+    if(favoriteGames.some(f=>f.url===g.url)){
+      favoriteGames=favoriteGames.filter(f=>f.url!==g.url);
+      star.classList.remove('active');
+    } else {
+      favoriteGames.push(g);
+      star.classList.add('active');
+    }
+    saveStorage();
+  };
+  gameControls.appendChild(star);
 
-  // IFRAME loading the actual game from /file/games/[type]/[name]
+  // Fullscreen button
+  const fsBtn = document.createElement('button'); fsBtn.className='btn'; fsBtn.textContent='Full Screen';
+  fsBtn.onclick=()=>iframe.requestFullscreen();
+  gameControls.appendChild(fsBtn);
+
+  // Iframe
   const iframe = document.createElement('iframe');
-  iframe.className = 'game-frame';
-  iframe.src = `/file/games/${typeNorm}/${nameNorm}`;
+  iframe.className='game-frame';
+  iframe.src=`/file/games/${typeNorm}/${nameNorm}`;
   contentArea.appendChild(iframe);
 
   // Save recent
@@ -137,15 +174,13 @@ function renderGamePage(g){
   const moreSection = document.createElement('div');
   moreSection.innerHTML='<div class="section-title">More Games</div>';
   const grid = document.createElement('div'); grid.className='grid';
-  if(moreGames.length===0) grid.innerHTML='<p style="color:#aaa;">No other games</p>';
+  if(moreGames.length===0) grid.innerHTML='<p class="muted">No other games</p>';
   else moreGames.slice(0,10).forEach(m=>grid.appendChild(createGameCard(m)));
   moreSection.appendChild(grid);
   contentArea.appendChild(moreSection);
 }
 
-function openGame(g){
-  renderGamePage(g);
-}
+function openGame(g){ renderGamePage(g); }
 
 buttons.forEach(btn=>{
   btn.onclick=()=>{
@@ -168,7 +203,6 @@ window.onpopstate = ()=>{
   } else renderHome();
 }
 
-// INIT
 fetchGames().then(()=>{
   const parts = window.location.pathname.split('/').filter(Boolean);
   if(parts[0]==='games' && parts.length>=3){
@@ -180,6 +214,5 @@ fetchGames().then(()=>{
   } else renderHome();
 });
 </script>
-
 </body>
 </html>
