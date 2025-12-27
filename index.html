@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malfunction</title>
 <style>
 :root{--bg:#000;--panel:#111;--accent:#ff3030;--card:#222;--text:#ddd;}
 body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);display:flex;overflow:hidden;}
 .sidebar{width:220px;background:var(--panel);padding:12px;display:flex;flex-direction:column;gap:8px;border-right:1px solid #222;}
-.sidebar button{background:var(--card);border:none;color:var(--text);padding:10px;border-radius:6px;cursor:pointer;}
+.sidebar button{background:var(--card);border:none;color:var(--text);padding:10px;border-radius:6px;cursor:pointer;text-align:left;}
 .sidebar button.active{background:#333;color:var(--accent);font-weight:700;}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 .topbar{height:50px;background:var(--panel);border-bottom:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:8px;}
@@ -30,6 +30,7 @@ body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);disp
 </style>
 </head>
 <body>
+
 <div class="sidebar" id="sidebar">
   <button class="active" data-zone="Home">Home</button>
   <button data-zone="PC">PC</button>
@@ -44,6 +45,7 @@ body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);disp
   <button data-zone="SNES">SNES</button>
   <button data-zone="Sega Genisis">Sega Genisis</button>
 </div>
+
 <div class="main">
   <div class="topbar"><h2 id="zoneTitle">Home</h2></div>
   <div class="content" id="contentArea">Loading...</div>
@@ -80,7 +82,6 @@ let allGames = [];
 let recentGames = JSON.parse(localStorage.getItem('recentGames')||'[]');
 let favoriteGames = JSON.parse(localStorage.getItem('favoriteGames')||'[]');
 
-// Fetch JSON
 async function fetchGames() {
   try {
     const res = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json');
@@ -90,16 +91,15 @@ async function fetchGames() {
   }
 }
 
-// Save storage
 function saveStorage(){
   localStorage.setItem('recentGames', JSON.stringify(recentGames));
   localStorage.setItem('favoriteGames', JSON.stringify(favoriteGames));
 }
 
-// Home view
 function renderHome(){
   zoneTitle.textContent='Home';
   contentArea.innerHTML='';
+
   const recentDiv = document.createElement('div');
   recentDiv.innerHTML='<div class="section-title">Recently Played</div>';
   const recentGrid = document.createElement('div'); recentGrid.className='grid';
@@ -117,7 +117,6 @@ function renderHome(){
   contentArea.appendChild(favDiv);
 }
 
-// Game card
 function createGameCard(g){
   const card = document.createElement('div'); card.className='card';
   card.innerHTML=`<img src="${g.cover}"><h3>${g.name}</h3>`;
@@ -125,7 +124,6 @@ function createGameCard(g){
   return card;
 }
 
-// Zone view
 function renderZone(zone){
   zoneTitle.textContent=zone;
   contentArea.innerHTML='';
@@ -142,27 +140,21 @@ function renderZone(zone){
   contentArea.appendChild(grid);
 }
 
-// Open game overlay
 function openGameOverlay(g){
   overlayTitle.textContent = g.name;
   history.pushState({game:g.name}, '', `/games/${encodeURIComponent(g.name)}`);
 
-  // Full file prodical fetch
   const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/PC/${encodeURIComponent(g.name)}/index.html`;
   fetch(gameURL)
-    .then(r => {
-      if(!r.ok) throw new Error('Game not found');
-      return r.text();
-    })
+    .then(r => r.ok ? r.text() : Promise.reject())
     .then(html => {
       const blob = new Blob([html], {type:'text/html'});
-      const blobURL = URL.createObjectURL(blob);
-      gameIframe.src = blobURL;
+      gameIframe.src = URL.createObjectURL(blob);
     })
     .catch(()=> {
       fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
         .then(r=>r.text())
-        .then(html=>gameIframe.src = URL.createObjectURL(new Blob([html], {type:'text/html'})))
+        .then(html => gameIframe.src = URL.createObjectURL(new Blob([html], {type:'text/html'})))
     });
 
   favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
@@ -179,7 +171,6 @@ function openGameOverlay(g){
   gameOverlay.style.display='flex';
 }
 
-// Favorite toggle
 favoriteBtn.onclick=()=>{
   const name = overlayTitle.textContent;
   const currentGame = allGames.find(g=>g.name===name);
@@ -190,19 +181,16 @@ favoriteBtn.onclick=()=>{
   saveStorage();
 }
 
-// Fullscreen
 fullscreenBtn.onclick=()=>{
   if(gameIframe.requestFullscreen) gameIframe.requestFullscreen();
   else if(gameIframe.webkitRequestFullscreen) gameIframe.webkitRequestFullscreen();
 }
 
-// Close overlay
 closeOverlayBtn.onclick=()=>{
-  gameOverlay.style.display='none'; 
+  gameOverlay.style.display='none';
   history.pushState({}, '', '/');
 }
 
-// Sidebar navigation
 buttons.forEach(btn=>{
   btn.onclick=()=>{
     buttons.forEach(b=>b.classList.remove('active'));
@@ -213,7 +201,6 @@ buttons.forEach(btn=>{
   }
 });
 
-// Handle back/forward
 window.onpopstate = (event)=>{
   if(event.state && event.state.game){
     const g = allGames.find(x=>x.name===event.state.game);
