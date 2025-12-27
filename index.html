@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hyper Game Hub</title>
+<title>Malfunction</title>
 <style>
 :root{--bg:#000;--panel:#111;--accent:#ff3030;--card:#222;--text:#ddd;}
 body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);display:flex;overflow:hidden;}
@@ -98,7 +98,6 @@ function saveStorage(){
 function renderHome(){
   zoneTitle.textContent='Home';
   contentArea.innerHTML='';
-  // Recently played
   const recentDiv = document.createElement('div');
   recentDiv.innerHTML='<div class="section-title">Recently Played</div>';
   const recentGrid = document.createElement('div'); recentGrid.className='grid';
@@ -110,7 +109,6 @@ function renderHome(){
   recentDiv.appendChild(recentGrid);
   contentArea.appendChild(recentDiv);
 
-  // Favorites
   const favDiv = document.createElement('div');
   favDiv.innerHTML='<div class="section-title">Favorites</div>';
   const favGrid = document.createElement('div'); favGrid.className='grid';
@@ -134,7 +132,7 @@ function renderZone(zone){
   zoneTitle.textContent=zone;
   contentArea.innerHTML='';
   const games = allGames.filter(g=>g.type===zone);
-  if(games.length===0){
+  if(games.length === 0){
     fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
       .then(r=>r.text())
       .then(html=>contentArea.innerHTML=html)
@@ -148,28 +146,12 @@ function renderZone(zone){
 
 function openGameOverlay(g){
   overlayTitle.textContent = g.name;
-  gameIframe.src = 'about:blank';
+  gameIframe.src = `${location.origin}/file/games/${encodeURIComponent(g.name)}`;
   favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
-  // Update recents
+
   recentGames=[g,...recentGames.filter(x=>x.url!==g.url)].slice(0,10);
   saveStorage();
 
-  // Load game HTML
-  fetch(g.url)
-    .then(r=>r.text())
-    .then(html=>{
-      gameIframe.contentWindow.document.open();
-      gameIframe.contentWindow.document.write(html);
-      gameIframe.contentWindow.document.close();
-    })
-    .catch(async ()=>{
-      const fallback = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html').then(r=>r.text());
-      gameIframe.contentWindow.document.open();
-      gameIframe.contentWindow.document.write(fallback);
-      gameIframe.contentWindow.document.close();
-    });
-
-  // More games (random 10 from same zone)
   const sameZone = allGames.filter(x=>x.type===g.type && x.url!==g.url);
   const shuffled = sameZone.sort(()=>0.5-Math.random()).slice(0,10);
   moreGamesContainer.innerHTML='<div class="section-title">More Games</div>';
@@ -181,8 +163,8 @@ function openGameOverlay(g){
 }
 
 favoriteBtn.onclick=()=>{
-  const url = overlayTitle.textContent;
-  const currentGame = allGames.find(g=>g.name===url);
+  const name = overlayTitle.textContent;
+  const currentGame = allGames.find(g=>g.name===name);
   if(!currentGame) return;
   const idx = favoriteGames.findIndex(x=>x.url===currentGame.url);
   if(idx>=0){
@@ -212,8 +194,7 @@ buttons.forEach(btn=>{
   }
 });
 
-// Initialize
 fetchGames().then(()=>renderHome());
 </script>
 </body>
-  </html>
+</html>
