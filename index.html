@@ -120,8 +120,9 @@ function renderGamePage(g){
   const nameNorm = encodeURIComponent(g.name);
   history.replaceState({game:g.name}, '', `/games/${typeNorm}/${nameNorm}`);
 
-  // Game iframe points to /file/games/[type]/[name]
   contentArea.innerHTML = '';
+
+  // IFRAME loading the actual game from /file/games/[type]/[name]
   const iframe = document.createElement('iframe');
   iframe.className = 'game-frame';
   iframe.src = `/file/games/${typeNorm}/${nameNorm}`;
@@ -167,7 +168,7 @@ window.onpopstate = ()=>{
   } else renderHome();
 }
 
-// Init
+// INIT
 fetchGames().then(()=>{
   const parts = window.location.pathname.split('/').filter(Boolean);
   if(parts[0]==='games' && parts.length>=3){
@@ -179,5 +180,6 @@ fetchGames().then(()=>{
   } else renderHome();
 });
 </script>
+
 </body>
 </html>
