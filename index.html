@@ -82,6 +82,8 @@ let allGames = [];
 let recentGames = JSON.parse(localStorage.getItem('recentGames')||'[]');
 let favoriteGames = JSON.parse(localStorage.getItem('favoriteGames')||'[]');
 
+function normalizeName(str){ return encodeURIComponent(str.replace(/\s+/g,'-')); }
+
 async function fetchGames() {
   try {
     const res = await fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json');
@@ -94,6 +96,13 @@ async function fetchGames() {
 function saveStorage(){
   localStorage.setItem('recentGames', JSON.stringify(recentGames));
   localStorage.setItem('favoriteGames', JSON.stringify(favoriteGames));
+}
+
+function createGameCard(g){
+  const card = document.createElement('div'); card.className='card';
+  card.innerHTML=`<img src="${g.cover}"><h3>${g.name}</h3>`;
+  card.onclick=()=>openGameOverlay(g);
+  return card;
 }
 
 function renderHome(){
@@ -117,17 +126,10 @@ function renderHome(){
   contentArea.appendChild(favDiv);
 }
 
-function createGameCard(g){
-  const card = document.createElement('div'); card.className='card';
-  card.innerHTML=`<img src="${g.cover}"><h3>${g.name}</h3>`;
-  card.onclick=()=>openGameOverlay(g);
-  return card;
-}
-
 function renderZone(zone){
   zoneTitle.textContent=zone;
   contentArea.innerHTML='';
-  const games = allGames.filter(g=>g.type===zone);
+  const games = allGames.filter(g=>g.type.toLowerCase()===zone.toLowerCase());
   if(games.length===0){
     fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
       .then(r=>r.text())
@@ -142,42 +144,29 @@ function renderZone(zone){
 
 function openGameOverlay(g){
   overlayTitle.textContent = g.name;
+  const typeNorm = normalizeName(g.type);
+  const nameNorm = normalizeName(g.name);
 
-  // Update URL
-  history.pushState({game:g.name}, '', `/games/${encodeURIComponent(g.type)}/${encodeURIComponent(g.name)}`);
+  // Update URL properly
+  history.pushState({game:g.name}, '', `/games/${typeNorm}/${nameNorm}`);
 
-  // --- GitHub raw strategy ---
-  const parts = window.location.pathname.split("/").filter(Boolean);
-  if(parts.length===1 && parts[0]==='Games'){
-    // show JSON
-    fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Zones.json')
-      .then(r=>r.json())
-      .then(json=>{
-        const pre = document.createElement('pre');
-        pre.textContent = JSON.stringify(json,null,2);
-        gameIframe.srcdoc = `<body style="background:#fff;color:#24292f;font-family:monospace;padding:20px"><pre>${pre.textContent}</pre></body>`;
-      });
-  } else {
-    // full file prodical
-    const typeFolder = g.type.replace(/\s+/g,'-');
-    const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/${typeFolder}/${encodeURIComponent(g.name)}/index.html`;
-    fetch(gameURL)
-      .then(r=>r.ok?r.text():Promise.reject())
-      .then(html=>{
-        gameIframe.srcdoc=html;
-      })
-      .catch(()=>{
-        fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
-          .then(r=>r.text())
-          .then(html=>gameIframe.srcdoc=html);
-      });
-  }
+  // Load game HTML from GitHub raw
+  const gameURL = `https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Hypper-Drive-2/refs/heads/main/Games/Files/Source/${typeNorm}/${nameNorm}/index.html`;
+  fetch(gameURL)
+    .then(r=>r.ok?r.text():Promise.reject())
+    .then(html=>{ gameIframe.srcdoc = html; })
+    .catch(()=>{
+      fetch('https://raw.githubusercontent.com/GLITCHED-OVERRIDE/Malfunction/refs/heads/main/Pages/404.html')
+        .then(r=>r.text())
+        .then(html=>gameIframe.srcdoc=html);
+    });
 
   favoriteBtn.classList.toggle('active', favoriteGames.find(x=>x.url===g.url));
   recentGames=[g,...recentGames.filter(x=>x.url!==g.url)].slice(0,10);
   saveStorage();
 
-  const sameZone = allGames.filter(x=>x.type===g.type && x.url!==g.url);
+  // More games from same zone
+  const sameZone = allGames.filter(x=>x.type.toLowerCase()===g.type.toLowerCase() && x.url!==g.url);
   const shuffled = sameZone.sort(()=>0.5-Math.random()).slice(0,10);
   moreGamesContainer.innerHTML='<div class="section-title">More Games</div>';
   const moreGrid = document.createElement('div'); moreGrid.className='grid';
