@@ -1,91 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glitch Hub</title>
-  <style>
-    :root {
-      --bg: #050505;
-      --accent: #ff2d2d;
-      --panel: rgba(20,20,20,0.95);
-      --text: #e0e0e0;
-      --border: #2f2f2f;
-      --hover: #2a2a2a;
-      --transition: all 0.3s ease;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    header {
-      background: var(--panel);
-      padding: 16px 32px;
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 700;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-
-    .section-button {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 24px 40px;
-      border-radius: 14px;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text);
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      min-width: 200px;
-    }
-
-    .section-button:hover {
-      background: var(--hover);
-      box-shadow: 0 0 20px var(--accent);
-    }
-
-    footer {
-      text-align: center;
-      padding: 12px;
-      background: var(--panel);
-      border-top: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: #aaa;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Control Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  background:#000;
+  color:#fff;
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:Arial;
+}
+button{
+  padding:20px 30px;
+  font-size:1.2rem;
+  cursor:pointer;
+}
+</style>
 </head>
 <body>
 
-  <header>Glitch Hub</header>
-
-  <main>
-    <div class="section-button" onclick="window.location.href='games/app.html'">Games</div>
-    <div class="section-button" onclick="window.location.href='movies/index.html'">Movies</div>
-    <div class="section-button" onclick="window.location.href='ai/index.html'">AI</div>
-    <div class="section-button" onclick="window.location.href='tools/index.html'">Tools</div>
-  </main>
-
-  <footer>&copy; 2025 Glitch Override. All rights reserved.</footer>
+<button onclick="location.href='/games/app.html'">🎮 Games</button>
+<button disabled>🎬 Movies</button>
+<button disabled>🤖 AI</button>
 
 </body>
 </html>
