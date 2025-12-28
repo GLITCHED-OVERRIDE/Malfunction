@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "framework": null,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/games/app.html"
+    }
+  ]
+}
