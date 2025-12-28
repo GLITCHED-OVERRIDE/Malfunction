@@ -1,7 +1,12 @@
 {
   "version": 2,
   "builds": [
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "games/app.html", "use": "@vercel/static" },
+    { "src": "games/app.js", "use": "@vercel/static" },
+    { "src": "games/styles.css", "use": "@vercel/static" },
+    { "src": "games/Games/**", "use": "@vercel/static" },
+    { "src": "games/Pages/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/", "dest": "/index.html" },
@@ -9,4 +14,3 @@
     { "src": "/games/(.*)", "dest": "/games/app.html" }
   ]
 }
-
