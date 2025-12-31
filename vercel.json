@@ -1,6 +1,11 @@
 {
   "version": 2,
+
+  "devCommand": "node index.js",
+
   "builds": [
+    { "src": "index.js", "use": "@vercel/node" },
+
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "games/app.html", "use": "@vercel/static" },
     { "src": "games/app.js", "use": "@vercel/static" },
@@ -8,9 +13,13 @@
     { "src": "games/Games/**", "use": "@vercel/static" },
     { "src": "games/Pages/**", "use": "@vercel/static" }
   ],
+
   "routes": [
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/games/?$", "dest": "/games/app.html" },
-    { "src": "/games/(.*)", "dest": "/games/app.html" }
+    { "src": "^/$", "dest": "/index.html" },
+
+    { "src": "^/games/?$", "dest": "/games/app.html" },
+    { "src": "^/games/(.*)", "dest": "/games/app.html" },
+
+    { "src": "/(.*)", "dest": "/index.js" }
   ]
 }
