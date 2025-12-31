@@ -1,91 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glitch Hub</title>
-  <style>
-    :root {
-      --bg: #050505;
-      --accent: #ff2d2d;
-      --panel: rgba(20,20,20,0.95);
-      --text: #e0e0e0;
-      --border: #2f2f2f;
-      --hover: #2a2a2a;
-      --transition: all 0.3s ease;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glitch Hub</title>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+<!-- ================= UV PROXY ================= -->
+<script src="/public/uv/uv.bundle.js"></script>
+<script src="/public/uv/uv.config.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/uv/sw.js", {
+      scope: __uv$config.prefix,
+    });
+  });
+}
+</script>
 
-    header {
-      background: var(--panel);
-      padding: 16px 32px;
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 700;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    }
+<style>
+:root {
+  --bg:#050505;
+  --accent:#ff2d2d;
+  --panel:rgba(20,20,20,0.96);
+  --text:#e0e0e0;
+  --border:#2f2f2f;
+  --hover:#2a2a2a;
+  --transition:all .3s ease;
+}
 
-    main {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
+*{box-sizing:border-box;margin:0;padding:0}
 
-    .section-button {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 24px 40px;
-      border-radius: 14px;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text);
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      min-width: 200px;
-    }
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
 
-    .section-button:hover {
-      background: var(--hover);
-      box-shadow: 0 0 20px var(--accent);
-    }
+/* ===== Header ===== */
+header{
+  background:var(--panel);
+  padding:16px 32px;
+  text-align:center;
+  font-size:2rem;
+  font-weight:700;
+  border-bottom:1px solid var(--border);
+}
 
-    footer {
-      text-align: center;
-      padding: 12px;
-      background: var(--panel);
-      border-top: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: #aaa;
-    }
-  </style>
+/* ===== Main ===== */
+main{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:40px;
+  gap:40px;
+  flex-wrap:wrap;
+}
+
+.section-button{
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:24px 40px;
+  border-radius:14px;
+  font-size:1.5rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:var(--transition);
+  min-width:220px;
+  text-align:center;
+}
+
+.section-button:hover{
+  background:var(--hover);
+  box-shadow:0 0 20px var(--accent);
+}
+
+/* ===== Footer ===== */
+footer{
+  text-align:center;
+  padding:12px;
+  background:var(--panel);
+  border-top:1px solid var(--border);
+  font-size:.85rem;
+  color:#aaa;
+}
+
+/* ===== PROXY OVERLAY ===== */
+#proxyOverlay{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:none;
+  flex-direction:column;
+  z-index:9999;
+}
+
+/* Top bar */
+#proxyBar{
+  height:60px;
+  background:var(--panel);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-bottom:2px solid var(--accent);
+}
+
+#proxyUrl{
+  flex:1;
+  height:40px;
+  background:#111;
+  border:none;
+  outline:none;
+  color:var(--accent);
+  padding:0 10px;
+  font-size:16px;
+  border-radius:6px;
+}
+
+#proxyGo,
+#proxyClose{
+  height:40px;
+  padding:0 16px;
+  border:none;
+  border-radius:6px;
+  background:var(--accent);
+  color:#000;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* iframe */
+#proxyFrame{
+  flex:1;
+  width:100%;
+  border:none;
+  background:#fff;
+}
+</style>
 </head>
+
 <body>
 
-  <header>Glitch Hub</header>
+<header>Glitch Hub</header>
 
-  <main>
-    <div class="section-button" onclick="window.location.href='/games/app.html'">Games</div>
-    <div class="section-button" onclick="window.location.href='movies/index.html'">Movies</div>
-    <div class="section-button" onclick="window.location.href='ai/index.html'">AI</div>
-    <div class="section-button" onclick="window.location.href='tools/index.html'">Tools</div>
-  </main>
+<main>
+  <div class="section-button" onclick="location.href='/games/app.html'">Games</div>
+  <div class="section-button" onclick="location.href='/movies/index.html'">Movies</div>
+  <div class="section-button" onclick="location.href='/ai/index.html'">AI</div>
+  <div class="section-button" onclick="location.href='/tools/index.html'">Tools</div>
+  <div class="section-button" onclick="openProxy()">Open Proxy</div>
+</main>
 
-  <footer>&copy; 2025 Glitch Override. All rights reserved.</footer>
+<footer>© 2025 Glitch Override. All rights reserved.</footer>
+
+<!-- ================= PROXY OVERLAY ================= -->
+<div id="proxyOverlay">
+  <div id="proxyBar">
+    <input id="proxyUrl" placeholder="Enter URL or search..." />
+    <button id="proxyGo">Go</button>
+    <button id="proxyClose">Close</button>
+  </div>
+  <iframe id="proxyFrame"></iframe>
+</div>
+
+<script>
+const overlay = document.getElementById("proxyOverlay");
+const frame = document.getElementById("proxyFrame");
+const urlInput = document.getElementById("proxyUrl");
+
+function openProxy(){
+  overlay.style.display="flex";
+  urlInput.focus();
+}
+
+document.getElementById("proxyClose").onclick = ()=>{
+  frame.src="about:blank";
+  overlay.style.display="none";
+};
+
+function loadProxy(url){
+  let target=url.trim();
+  if(!target) return;
+
+  if(!target.includes(".")){
+    target="https://duckduckgo.com/?q="+encodeURIComponent(target);
+  } else if(!target.startsWith("http")){
+    target="https://"+target;
+  }
+
+  frame.src = __uv$config.prefix + __uv$config.encodeUrl(target);
+}
+
+document.getElementById("proxyGo").onclick = ()=>{
+  loadProxy(urlInput.value);
+};
+
+urlInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter") loadProxy(urlInput.value);
+});
+</script>
 
 </body>
 </html>
